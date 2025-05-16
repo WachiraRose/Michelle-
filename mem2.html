@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Daughter's Memory Flipbook with Covers & Music</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to bottom, #ffe0f0, #fceaff);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    #password-gate {
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #ffe0f0;
+      display: flex;
+      width: 100vw;
+    }
+
+    #password-gate h2 {
+      margin-bottom: 1em;
+      color: #b33989;
+    }
+
+    #access-code {
+      padding: 0.5em;
+      font-size: 1em;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 1em;
+      width: 250px;
+      max-width: 90vw;
+      box-sizing: border-box;
+    }
+
+    #unlock-btn {
+      padding: 0.7em 1.5em;
+      background: #d87ed9;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      width: 150px;
+      max-width: 90vw;
+      transition: background-color 0.3s ease;
+    }
+
+    #unlock-btn:hover {
+      background: #c15ac1;
+    }
+
+    #error-msg {
+      color: red;
+      margin-top: 1em;
+      display: none;
+    }
+
+    #controls {
+      margin-bottom: 20px;
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    #controls button {
+      padding: 10px 20px;
+      background-color: #d87ed9;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      font-size: 1em;
+      user-select: none;
+    }
+
+    #controls button:hover {
+      background-color: #c15ac1;
+    }
+
+    #album-container {
+      display: none;
+      width: 95vw;
+      max-width: 900px;
+      height: 80vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      user-select: none;
+    }
+
+    .book {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      gap: 1em;
+      overflow: hidden;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(179, 57, 137, 0.25);
+      background: white;
+    }
+
+    .page {
+      width: 50%;
+      height: 100%;
+      background: white;
+      border-radius: 12px;
+      padding: 1.2em;
+      box-sizing: border-box;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: 0 4px 15px rgba(183, 53, 135, 0.15);
+      transition: transform 0.3s ease;
+    }
+
+    .page:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 30px rgba(183, 53, 135, 0.4);
+      z-index: 10;
+    }
+
+    .photo-container {
+      position: relative;
+      flex-shrink: 0;
+      margin-bottom: 10px;
+    }
+
+    .photo {
+      width: 100%;
+      max-height: 280px;
+      object-fit: contain;
+      border-radius: 14px;
+      box-shadow: 0 8px 15px rgba(179, 57, 137, 0.3);
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+      cursor: pointer;
+    }
+
+    .photo:hover {
+      transform: scale(1.08);
+      box-shadow: 0 14px 35px rgba(179, 57, 137, 0.7);
+      z-index: 20;
+    }
+
+    .photo-title {
+      text-align: center;
+      font-weight: 600;
+      font-size: 1em;
+      margin-top: 6px;
+      color: #a3458a;
+      user-select: text;
+    }
+
+    textarea.caption, textarea.note {
+      width: 100%;
+      border: none;
+      background: #fff0f5;
+      font-size: 1em;
+      padding: 0.75em;
+      border-radius: 10px;
+      box-shadow: inset 0 0 8px rgba(179, 57, 137, 0.1);
+      resize: vertical;
+      min-height: 4em;
+      margin-top: 10px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #4a1d4a;
+    }
+
+    .page-buttons {
+      position: absolute;
+      bottom: 15px;
+      right: 15px;
+      display: flex;
+      gap: 15px;
+      font-size: 1.8em;
+      user-select: none;
+    }
+
+    .page-buttons button {
+      width: 45px;
+      height: 45px;
+      padding: 0;
+      line-height: 1;
+      font-weight: bold;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.6em;
+    }
+
+    label.upload-label {
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: block;
+      color: #9a3f97;
+      cursor: pointer;
+    }
+
+    input[type="file"] {
+      border-radius: 8px;
+      border: 1px solid #d8a5d8;
+      padding: 6px 12px;
+      font-weight: 600;
+      color: #b84fc1;
+      cursor: pointer;
+      margin-bottom: 12px;
+      width: 100%;
+      box-sizing: border-box;
+      transition: background-color 0.3s ease;
+    }
+
+    input[type="file"]:hover {
+      background-color: #f6d0f6;
+    }
+
+    #page-number {
+      position: fixed;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-weight: 700;
+      font-size: 1.2em;
+      color: #b33989;
+      background: #fff0f5cc;
+      padding: 6px 14px;
+      border-radius: 12px;
+      box-shadow: 0 0 8px rgba(179, 57, 137, 0.4);
+      user-select: none;
+      pointer-events: none;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <div id="password-gate">
+    <h2>Enter Access Code to View Album</h2>
+    <input type="password" id="access-code" placeholder="Enter code" />
+    <button id="unlock-btn" onclick="checkCode()">Unlock Album</button>
+    <p id="error-msg">Incorrect code, please try again.</p>
+  </div>
+
+  <div id="controls">
+    <button onclick="window.print()">🖨️ Print</button>
+    <button onclick="downloadBook()">⬇️ Download</button>
+  </div>
+
+  <div id="album-container">
+    <div id="page-number">Page 1</div>
+    <div class="book">
+      <div class="page" id="left-page">
+        <label class="upload-label" for="left-upload">Choose Images (Left Page):</label>
+        <input type="file" id="left-upload" multiple accept="image/*" onchange="handleUpload(event, 'left')" />
+        <div id="left-photos"></div>
+        <textarea class="caption" placeholder="Add a fancy caption..." oninput="saveNote('left-caption')" id="left-caption"></textarea>
+        <textarea class="note" placeholder="Write a personal note to your daughter..." oninput="saveNote('left-note')" id="left-note"></textarea>
+      </div>
+
+      <div class="page" id="right-page">
+        <label class="upload-label" for="right-upload">Choose Images (Right Page):</label>
+        <input type="file" id="right-upload" multiple accept="image/*" onchange="handleUpload(event, 'right')" />
+        <div id="right-photos"></div>
+        <textarea class="caption" placeholder="Add a fancy caption..." oninput="saveNote('right-caption')" id="right-caption"></textarea>
+        <textarea class="note" placeholder="Write a personal note to your daughter..." oninput="saveNote('right-note')" id="right-note"></textarea>
+        <div class="page-buttons">
+          <button title="Previous Page" onclick="prevPages()" aria-label="Previous Page">←</button>
+          <button title="Next Page" onclick="nextPages()" aria-label="Next Page">→</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Background music -->
+  <audio id="bg-music" loop>
+    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_491c6211a4.mp3?filename=calm-morning-11269.mp3" type="audio/mpeg" />
+    Your browser does not support the audio element.
+  </audio>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+  const correctCode = "MySecret123"; // Change your access code here
+  const passwordGate = document.getElementById("password-gate");
+  const albumContainer = document.getElementById("album-container");
+  const bgMusic = document.getElementById("bg-music");
+
+  function checkCode() {
+    const inputCode = document.getElementById("access-code").value;
+    const errorMsg = document.getElementById("error-msg");
+    if (inputCode === correctCode) {
+      passwordGate.style.display = "none";
+      albumContainer.style.display = "flex";
+      bgMusic.play();
+    } else {
+      errorMsg.style.display = "block";
+    }
+  }
+
+  // State of current pages (left & right page numbers)
+  let currentPage = 0;
+
+  // Placeholder: You can replace these arrays with your own image URLs or uploads
+  let leftImages = [];
+  let rightImages = [];
+
+  // Titles for images/pages, example arrays that correspond to image order:
+  // (You can customize these titles or add more)
+  const titles = [
+    // Pages 1-20 cover: "Mom and Dad before they met"
+    ...Array(20).fill("Mom and Dad Before They Met"),
+    // Pages 21-40 cover: "Mom and Dad After They Met"
+    ...Array(20).fill("Mom and Dad After They Met"),
+    // Pages 41-60 cover: "All About Me"
+    ...Array(20).fill("All About Me"),
+    // Pages 61-80 cover: "Big Size"
+    ...Array(20).fill("Big Size"),
+    // Pages 81-100 cover: "Future"
+    ...Array(20).fill("Future"),
+  ];
+
+  function handleUpload(event, side) {
+    const files = Array.from(event.target.files);
+    if (!files.length) return;
+
+    // Hide file input after loading images
+    event.target.style.display = "none";
+
+    // Clear previous photos on that side
+    if (side === "left") {
+      leftImages = [];
+      document.getElementById("left-photos").innerHTML = "";
+    } else {
+      rightImages = [];
+      document.getElementById("right-photos").innerHTML = "";
+    }
+
+    // Load images and display
+    files.forEach((file, index) => {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const container = document.createElement("div");
+        container.classList.add("photo-container");
+
+        const img = document.createElement("img");
+        img.src = e.target.result;
+        img.classList.add("photo");
+        container.appendChild(img);
+
+        // Calculate image global index (depending on side)
+        let imageIndex = 0;
+        if (side === "left") {
+          imageIndex = index; // zero-based on left side
+          leftImages.push(e.target.result);
+        } else {
+          imageIndex = 20 + index; // right page images index start from 20 (for example)
+          rightImages.push(e.target.result);
+        }
+
+        // Get title based on global imageIndex
+        let titleText = titles[imageIndex] || "Memories";
+
+        const title = document.createElement("div");
+        title.classList.add("photo-title");
+        title.textContent = titleText;
+        container.appendChild(title);
+
+        if (side === "left") {
+          document.getElementById("left-photos").appendChild(container);
+        } else {
+          document.getElementById("right-photos").appendChild(container);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function saveNote(id) {
+    const el = document.getElementById(id);
+    localStorage.setItem(id, el.value);
+  }
+
+  function loadNotes() {
+    ["left-caption", "right-caption", "left-note", "right-note"].forEach(id => {
+      const val = localStorage.getItem(id);
+      if (val) document.getElementById(id).value = val;
+    });
+  }
+
+  function updatePageNumber() {
+    const pageNum = document.getElementById("page-number");
+    pageNum.textContent = `Page ${currentPage + 1}`;
+  }
+
+  function nextPages() {
+    currentPage++;
+    if (currentPage >= 100) currentPage = 0; // loop back after 100 pages
+    updatePageNumber();
+  }
+
+  function prevPages() {
+    currentPage--;
+    if (currentPage < 0) currentPage = 99; // loop back to last page
+    updatePageNumber();
+  }
+
+  function downloadBook() {
+    const book = document.querySelector(".book");
+    html2canvas(book).then(canvas => {
+      const link = document.createElement("a");
+      link.download = `flipbook-page-${currentPage + 1}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    });
+  }
+
+  // Load saved notes on page load
+  window.onload = () => {
+    loadNotes();
+  };
+</script>
+</body>
+</html>
